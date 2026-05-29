@@ -2,28 +2,97 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-# Configuración de página ancha y limpia
+# Configuración de página ancha con un diseño limpio
 st.set_page_config(
     page_title="Global Football Tracker",
     page_icon="⚽",
     layout="wide"
 )
 
-# Estilos CSS personalizados para la cabecera
+# Estilos CSS avanzados para replicar un layout de software deportivo premium
 st.markdown("""
     <style>
+    /* Títulos e Interfaz */
     .main-title {
-        font-size: 38px !important;
+        font-size: 36px !important;
         font-weight: 800;
         color: #1E3A8A;
         text-align: center;
-        margin-bottom: 5px;
+        margin-bottom: 2px;
     }
     .subtitle {
-        font-size: 16px;
+        font-size: 15px;
         color: #4B5563;
         text-align: center;
-        margin-bottom: 25px;
+        margin-bottom: 15px;
+    }
+    .season-badge {
+        background-color: #1E3A8A;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-weight: bold;
+        font-size: 14px;
+        display: inline-block;
+        margin-bottom: 15px;
+    }
+    
+    /* Simulación de Tabla Avanzada en HTML */
+    .table-container {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: 'Source Sans Pro', sans-serif;
+    }
+    .th-custom {
+        background-color: #F3F4F6;
+        color: #1F2937;
+        font-weight: 700;
+        padding: 10px;
+        text-align: left;
+        border-bottom: 2px solid #E5E7EB;
+        font-size: 13px;
+    }
+    .tr-custom {
+        border-bottom: 1px solid #E5E7EB;
+        height: 38px;
+    }
+    .tr-custom:hover {
+        background-color: #F9FAFB;
+    }
+    .td-custom {
+        padding: 8px 10px;
+        font-size: 14px;
+        color: #111827;
+    }
+    
+    /* Indicadores de Clasificación a la Izquierda (Bordes de Color) */
+    .border-campeon { border-left: 5px solid #10B981 !important; }
+    .border-champions { border-left: 5px solid #3B82F6 !important; }
+    .border-europa { border-left: 5px solid #F59E0B !important; }
+    .border-conference { border-left: 5px solid #10B981 !important; }
+    .border-descenso { border-left: 5px solid #EF4444 !important; }
+    .border-normal { border-left: 5px solid #9CA3AF !important; }
+    
+    /* Panel de Rango Matemático a la Derecha */
+    .rango-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        margin-top: 38px; /* Sincronizado con la altura del header de la tabla */
+    }
+    .rango-box {
+        height: 39px; /* Sincronizado exactamente con cada fila */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #F3F4F6;
+        border-radius: 4px;
+        margin-bottom: 1px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #374151;
+        border: 1px solid #E5E7EB;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -31,9 +100,22 @@ st.markdown("""
 st.markdown('<p class="main-title">⚽ Sistema Global de Tabla de Posiciones</p>', unsafe_allow_html=True)
 st.markdown('<p class="subtitle">Análisis de zonas de clasificación, descenso y rangos matemáticos potenciales.</p>', unsafe_allow_html=True)
 
-# --- 1. GENERACIÓN SIMULADA E INTELIGENTE DE DATOS DE LAS LIGAS ---
+# --- 1. PROCESAMIENTO E INTELIGENCIA DE LOS DATOS ---
 @st.cache_data
-def cargar_datos_liga(liga):
+def cargar_datos_y_logica(liga):
+    # Formato de temporadas considerando el año actual 2026
+    temporadas = {
+        "Premier League (Inglaterra)": "Temporada 2025/2026",
+        "LaLiga (España)": "Temporada 2025/2026",
+        "Serie A (Italia)": "Temporada 2025/2026",
+        "Bundesliga (Alemania)": "Temporada 2025/2026",
+        "Ligue 1 (Francia)": "Temporada 2025/2026",
+        "Brasileirão (Brasil)": "Temporada 2026",
+        "Liga Profesional (Argentina)": "Temporada 2026",
+        "Saudi Pro League (Arabia Saudita)": "Temporada 2025/2026",
+        "Liga MX (México)": "Torneo Clausura 2026"
+    }
+
     equipos_dict = {
         "Premier League (Inglaterra)": ["Arsenal", "Manchester City", "Liverpool", "Aston Villa", "Tottenham", "Chelsea", "Manchester United", "Newcastle", "West Ham", "Bournemouth", "Brighton", "Wolves", "Fulham", "Everton", "Brentford", "Nottingham Forest", "Crystal Palace", "Ipswich Town", "Leicester City", "Southampton"],
         "LaLiga (España)": ["Real Madrid", "Barcelona", "Girona", "Atlético de Madrid", "Athletic Club", "Real Sociedad", "Real Betis", "Valencia", "Villarreal", "Getafe", "Osasuna", "Las Palmas", "Alavés", "Sevilla", "Mallorca", "Rayo Vallecano", "Celta de Vigo", "Valladolid", "Leganés", "Espanyol"],
@@ -50,22 +132,20 @@ def cargar_datos_liga(liga):
     n_equipos = len(equipos)
     
     puntos_base = np.linspace(n_equipos * 3.8, n_equipos * 0.8, n_equipos)
-    puntos = np.round(puntos_base + np.random.normal(0, 1.5, n_equipos)).astype(int)
-    puntos = np.sort(puntos)[::-1]
+    puntos = np.sort(np.round(puntos_base + np.random.normal(0, 1.2, n_equipos)).astype(int))[::-1]
     
     df = pd.DataFrame({
         "Pos": range(1, n_equipos + 1),
         "Equipo": equipos,
         "PJ": [34 if "Alemania" in liga or "Francia" in liga else 38 for _ in range(n_equipos)],
         "Pts": puntos,
-        "DG": np.sort(np.round(np.random.normal(12, 10, n_equipos)).astype(int))[::-1]
+        "DG": np.sort(np.round(np.random.normal(14, 9, n_equipos)).astype(int))[::-1]
     })
     
-    # --- CÁLCULO MATEMÁTICO DEL RANGO (Faltan 3 fechas = 9 Pts) ---
+    # Cálculo Matemático del Rango
     pts_en_juego = 9
-    rango_min = []
-    rango_max = []
-    estados = []
+    rango_final = []
+    clase_borde = []
     
     for idx, row in df.iterrows():
         pos_actual = row["Pos"]
@@ -75,60 +155,58 @@ def cargar_datos_liga(liga):
         for o_idx, o_row in df.iterrows():
             if o_idx != idx and o_row["Pts"] > (pts_actuales + pts_en_juego):
                 max_pos += 1
-                
         min_pos = n_equipos
         for o_idx, o_row in df.iterrows():
             if o_idx != idx and (o_row["Pts"] + pts_en_juego) < pts_actuales:
                 min_pos -= 1
                 
-        rango_min.append(max_pos)
-        rango_max.append(min_pos)
+        rango_final.append(f"{max_pos}° - {min_pos}°")
         
-        # Asignar estados de torneo con formato de texto limpio + emoji
+        # Clasificación por colores para el adorno/borde izquierdo
         if pos_actual == 1:
-            estados.append("🏆 Campeón")
+            clase_borde.append("border-campeon")
         elif "Inglaterra" in liga or "España" in liga or "Italia" in liga:
-            if pos_actual in [2, 3, 4]: estados.append("🔵 Champions League")
-            elif pos_actual == 5: estados.append("🟠 Europa League")
-            elif pos_actual == 6: estados.append("🟢 Conference League")
-            elif pos_actual >= (n_equipos - 2): estados.append("🔻 Zona Descenso")
-            else: estados.append("⚪ Mitad de Tabla")
+            if pos_actual in [2, 3, 4]: clase_borde.append("border-champions")
+            elif pos_actual == 5: clase_borde.append("border-europa")
+            elif pos_actual == 6: clase_borde.append("border-conference")
+            elif pos_actual >= (n_equipos - 2): clase_borde.append("border-descenso")
+            else: clase_borde.append("border-normal")
         elif "Alemania" in liga:
-            if pos_actual in [2, 3, 4]: estados.append("🔵 Champions League")
-            elif pos_actual == 5: estados.append("🟠 Europa League")
-            elif pos_actual == 6: estados.append("🟢 Conference League")
-            elif pos_actual >= (n_equipos - 1): estados.append("🔻 Zona Descenso")
-            else: estados.append("⚪ Mitad de Tabla")
+            if pos_actual in [2, 3, 4]: clase_borde.append("border-champions")
+            elif pos_actual == 5: clase_borde.append("border-europa")
+            elif pos_actual == 6: clase_borde.append("border-conference")
+            elif pos_actual >= (n_equipos - 1): clase_borde.append("border-descenso")
+            else: clase_borde.append("border-normal")
         elif "Francia" in liga:
-            if pos_actual in [2, 3]: estados.append("🔵 Champions League")
-            elif pos_actual == 4: estados.append("🟠 Europa League")
-            elif pos_actual == 5: estados.append("🟢 Conference League")
-            elif pos_actual >= (n_equipos - 2): estados.append("🔻 Zona Descenso")
-            else: estados.append("⚪ Mitad de Tabla")
+            if pos_actual in [2, 3]: clase_borde.append("border-champions")
+            elif pos_actual == 4: clase_borde.append("border-europa")
+            elif pos_actual == 5: clase_borde.append("border-conference")
+            elif pos_actual >= (n_equipos - 2): clase_borde.append("border-descenso")
+            else: clase_borde.append("border-normal")
         elif "Brasil" in liga:
-            if pos_actual in range(2, 7): estados.append("🔵 Copa Libertadores")
-            elif pos_actual in range(7, 13): estados.append("🟠 Copa Sudamericana")
-            elif pos_actual >= (n_equipos - 3): estados.append("🔻 Zona Descenso")
-            else: estados.append("⚪ Mitad de Tabla")
+            if pos_actual in range(2, 7): clase_borde.append("border-champions") # Libertadores
+            elif pos_actual in range(7, 13): clase_borde.append("border-europa") # Sudamericana
+            elif pos_actual >= (n_equipos - 3): clase_borde.append("border-descenso")
+            else: clase_borde.append("border-normal")
         elif "Argentina" in liga:
-            if pos_actual in range(2, 5): estados.append("🔵 Copa Libertadores")
-            elif pos_actual in range(5, 10): estados.append("🟠 Copa Sudamericana")
-            elif pos_actual == n_equipos: estados.append("🔻 Zona Descenso")
-            else: estados.append("⚪ Mitad de Tabla")
+            if pos_actual in range(2, 5): clase_borde.append("border-champions") # Libertadores
+            elif pos_actual in range(5, 10): clase_borde.append("border-europa") # Sudamericana
+            elif pos_actual == n_equipos: clase_borde.append("border-descenso")
+            else: clase_borde.append("border-normal")
         elif "Arabia" in liga:
-            if pos_actual in [2, 3]: estados.append("🔵 AFC Champions")
-            elif pos_actual >= (n_equipos - 2): estados.append("🔻 Zona Descenso")
-            else: estados.append("⚪ Mitad de Tabla")
+            if pos_actual in [2, 3]: clase_borde.append("border-champions") # AFC
+            elif pos_actual >= (n_equipos - 2): clase_borde.append("border-descenso")
+            else: clase_borde.append("border-normal")
         else: # México
-            if pos_actual in range(2, 7): estados.append("⚡ Liguilla Directa")
-            elif pos_actual in range(7, 11): estados.append("🎟️ Zona Play-In")
-            else: estados.append("⚪ Eliminado")
+            if pos_actual in range(2, 7): clase_borde.append("border-champions") # Liguilla
+            elif pos_actual in range(7, 11): clase_borde.append("border-europa") # Play-In
+            else: clase_borde.append("border-normal")
 
-    df["Estado del Torneo"] = estados
-    df["Rango Matemático"] = [f"{mi}° al {ma}°" for mi, ma in zip(rango_min, rango_max)]
-    return df
+    df["BordeClase"] = clase_borde
+    df["RangoMat"] = rango_final
+    return df, temporadas[liga]
 
-# --- 2. DISEÑO DE LAS PESTAÑAS ---
+# --- 2. ESTRUCTURA DE LAS PESTAÑAS ---
 tab1, tab2 = st.tabs(["📊 Tablas Interactivas y Margen Matemático", "📈 Estadísticas Avanzadas"])
 
 with tab1:
@@ -139,41 +217,57 @@ with tab1:
          "Saudi Pro League (Arabia Saudita)", "Liga MX (México)"]
     )
     
-    df_liga = cargar_datos_liga(liga_seleccionada)
+    df_liga, temporada_texto = cargar_datos_logica(liga_seleccionada)
     
-    st.markdown("💡 *Nota: Deja el cursor sobre cualquier cabecera o dato para ver información adicional.*")
+    # 1. Indicador de Temporada arriba de la tabla
+    st.markdown(f'<div class="season-badge">🗓️ {temporada_texto}</div>', unsafe_allow_html=True)
     
-    # Renderizado corregido y 100% estable en st.dataframe
-    st.dataframe(
-        df_liga,
-        column_config={
-            "Pos": st.column_config.NumberColumn("Posición", help="Puesto actual en la clasificación", format="%d"),
-            "Equipo": st.column_config.TextColumn("Equipo", help="Nombre oficial del club"),
-            "PJ": st.column_config.NumberColumn("PJ", help="Partidos Jugados"),
-            "Pts": st.column_config.NumberColumn("Pts", help="Puntos acumulados totales"),
-            "DG": st.column_config.NumberColumn("DG", help="Diferencia de goles (Goles a Favor - Goles en Contra)"),
-            "Estado del Torneo": st.column_config.TextColumn(
-                "Estado y Clasificación",
-                help="Situación de acceso a copas o zona roja de descenso"
-            ),
-            "Rango Matemático": st.column_config.TextColumn(
-                "Rango Matemático Potencial",
-                help="Peor y mejor puesto posible considerando los puntos restantes del torneo"
-            )
-        },
-        hide_index=True,
-        use_container_width=True,
-        height=620
-    )
+    # Leyenda Integrada Orientativa
+    st.markdown("""
+    <div style="display: flex; gap: 15px; margin-bottom: 15px; font-size: 12px; font-weight: bold;">
+        <span style="border-left: 4px solid #10B981; padding-left: 5px; color: #065F46;">🟢 Campeón / Playoffs</span>
+        <span style="border-left: 4px solid #3B82F6; padding-left: 5px; color: #1E40AF;">🔵 Competencia Internac. Principal</span>
+        <span style="border-left: 4px solid #F59E0B; padding-left: 5px; color: #92400E;">🟡 Competencia Internac. Secundaria</span>
+        <span style="border-left: 4px solid #EF4444; padding-left: 5px; color: #991B1B;">🔴 Peligro / Descenso</span>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Creación del layout dividido: Tabla a la izquierda (83%) y Rango matemático a la derecha (17%)
+    col_tabla, col_rango = st.columns([83, 17])
+    
+    with col_tabla:
+        # 2. Renderización de la tabla con estilos CSS puros (Inyección del adorno a la izquierda)
+        html_table = '<table class="table-container"><thead><tr>'
+        html_table += '<th class="th-custom" style="width: 80px;">Posición</th>'
+        html_table += '<th class="th-custom">Equipo</th>'
+        html_table += '<th class="th-custom" style="width: 80px;">PJ</th>'
+        html_table += '<th class="th-custom" style="width: 80px;">DG</th>'
+        html_table += '<th class="th-custom" style="width: 100px;">Puntos</th>'
+        html_table += '</tr></thead><tbody>'
+        
+        for _, row in df_liga.iterrows():
+            html_table += f'<tr class="tr-custom">'
+            html_table += f'<td class="td-custom {row["BordeClase"]}" style="font-weight: bold; text-align: center;">{row["Pos"]}°</td>'
+            html_table += f'<td class="td-custom" style="font-weight: 500;">{row["Equipo"]}</td>'
+            html_table += f'<td class="td-custom">{row["PJ"]}</td>'
+            html_table += f'<td class="td-custom" style="color: {"#10B981" if row["DG"] >= 0 else "#EF4444"}">{row["DG"]}</td>'
+            html_table += f'<td class="td-custom" style="font-weight: bold; background-color: #F9FAFB;">{row["Pts"]}</td>'
+            html_table += '</tr>'
+            
+        html_table += '</tbody></table>'
+        st.markdown(html_table, unsafe_allow_html=True)
+        
+    with col_rango:
+        # Header alineado del panel derecho
+        st.markdown('<div style="font-weight: 700; font-size: 13px; color: #1F2937; padding: 10px 0; border-bottom: 2px solid #E5E7EB; text-align: center; height: 40px;">Rango Pos.</div>', unsafe_allow_html=True)
+        
+        # 3. Línea exterior acoplada que muestra el rango matemático por cada fila
+        rango_html = '<div class="rango-container">'
+        for _, row in df_liga.iterrows():
+            rango_html += f'<div class="rango-box" title="Límites matemáticos actuales para {row["Equipo"]}">{row["RangoMat"]}</div>'
+        rango_html += '</div>'
+        st.markdown(rango_html, unsafe_allow_html=True)
 
 with tab2:
-    st.subheader("📈 Rendimiento y Métricas del Torneo")
+    st.subheader(" McKinley Analítica Gráfica")
     st.info("Pestaña de analítica en desarrollo. Aquí se integrarán gráficos de dispersión de ataque/defensa y evolución de jornadas.")
-    
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.metric(label="Puntaje Máximo Registrado", value=f"{df_liga['Pts'].max()} Pts", delta="Puntero")
-    with c2:
-        st.metric(label="Promedio Diferencia de Goles", value=f"{round(df_liga['DG'].mean(), 1)}", delta="Competitividad")
-    with c3:
-        st.metric(label="Puntos Críticos de Salvación", value=f"{df_liga['Pts'].iloc[-4]} Pts", delta="Margen del Descenso")
