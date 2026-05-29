@@ -84,43 +84,43 @@ def cargar_datos_liga(liga):
         rango_min.append(max_pos)
         rango_max.append(min_pos)
         
-        # Asignar estados de torneo para la etiqueta visual
+        # Asignar estados de torneo con formato de texto limpio + emoji
         if pos_actual == 1:
             estados.append("🏆 Campeón")
         elif "Inglaterra" in liga or "España" in liga or "Italia" in liga:
-            if pos_actual in [2, 3, 4]: estados.append("🇪🇺 Champions League")
-            elif pos_actual == 5: estados.append("🇪🇺 Europa League")
-            elif pos_actual == 6: estados.append("🇪🇺 Conference League")
+            if pos_actual in [2, 3, 4]: estados.append("🔵 Champions League")
+            elif pos_actual == 5: estados.append("🟠 Europa League")
+            elif pos_actual == 6: estados.append("🟢 Conference League")
             elif pos_actual >= (n_equipos - 2): estados.append("🔻 Zona Descenso")
             else: estados.append("⚪ Mitad de Tabla")
         elif "Alemania" in liga:
-            if pos_actual in [2, 3, 4]: estados.append("🇪🇺 Champions League")
-            elif pos_actual == 5: estados.append("🇪🇺 Europa League")
-            elif pos_actual == 6: estados.append("🇪🇺 Conference League")
+            if pos_actual in [2, 3, 4]: estados.append("🔵 Champions League")
+            elif pos_actual == 5: estados.append("🟠 Europa League")
+            elif pos_actual == 6: estados.append("🟢 Conference League")
             elif pos_actual >= (n_equipos - 1): estados.append("🔻 Zona Descenso")
             else: estados.append("⚪ Mitad de Tabla")
         elif "Francia" in liga:
-            if pos_actual in [2, 3]: estados.append("🇪🇺 Champions League")
-            elif pos_actual == 4: estados.append("🇪🇺 Europa League")
-            elif pos_actual == 5: estados.append("🇪🇺 Conference League")
+            if pos_actual in [2, 3]: estados.append("🔵 Champions League")
+            elif pos_actual == 4: estados.append("🟠 Europa League")
+            elif pos_actual == 5: estados.append("🟢 Conference League")
             elif pos_actual >= (n_equipos - 2): estados.append("🔻 Zona Descenso")
             else: estados.append("⚪ Mitad de Tabla")
         elif "Brasil" in liga:
-            if pos_actual in range(2, 7): estados.append("🌎 Copa Libertadores")
-            elif pos_actual in range(7, 13): estados.append("🌎 Copa Sudamericana")
+            if pos_actual in range(2, 7): estados.append("🔵 Copa Libertadores")
+            elif pos_actual in range(7, 13): estados.append("🟠 Copa Sudamericana")
             elif pos_actual >= (n_equipos - 3): estados.append("🔻 Zona Descenso")
             else: estados.append("⚪ Mitad de Tabla")
         elif "Argentina" in liga:
-            if pos_actual in range(2, 5): estados.append("🌎 Copa Libertadores")
-            elif pos_actual in range(5, 10): estados.append("🌎 Copa Sudamericana")
+            if pos_actual in range(2, 5): estados.append("🔵 Copa Libertadores")
+            elif pos_actual in range(5, 10): estados.append("🟠 Copa Sudamericana")
             elif pos_actual == n_equipos: estados.append("🔻 Zona Descenso")
             else: estados.append("⚪ Mitad de Tabla")
         elif "Arabia" in liga:
-            if pos_actual in [2, 3]: estados.append("🌏 AFC Champions League")
+            if pos_actual in [2, 3]: estados.append("🔵 AFC Champions")
             elif pos_actual >= (n_equipos - 2): estados.append("🔻 Zona Descenso")
             else: estados.append("⚪ Mitad de Tabla")
         else: # México
-            if pos_actual in range(2, 7): estados.append("🇲🇽 Liguilla Directa")
+            if pos_actual in range(2, 7): estados.append("⚡ Liguilla Directa")
             elif pos_actual in range(7, 11): estados.append("🎟️ Zona Play-In")
             else: estados.append("⚪ Eliminado")
 
@@ -141,30 +141,29 @@ with tab1:
     
     df_liga = cargar_datos_liga(liga_seleccionada)
     
-    st.markdown("💡 *Nota: El sistema calcula dinámicamente el **Rango Matemático** (peor y mejor escenario) basándose en los puntos restantes.*")
+    st.markdown("💡 *Nota: Deja el cursor sobre cualquier cabecera o dato para ver información adicional.*")
     
-    # Renderizado optimizado con st.dataframe nativo y avanzado
+    # Renderizado corregido y 100% estable en st.dataframe
     st.dataframe(
         df_liga,
         column_config={
-            "Pos": st.column_config.NumberColumn("Posición", help="Puesto actual en la tabla", format="%d"),
-            "Equipo": st.column_config.TextColumn("Equipo", help="Nombre del Club deportivo"),
+            "Pos": st.column_config.NumberColumn("Posición", help="Puesto actual en la clasificación", format="%d"),
+            "Equipo": st.column_config.TextColumn("Equipo", help="Nombre oficial del club"),
             "PJ": st.column_config.NumberColumn("PJ", help="Partidos Jugados"),
-            "Pts": st.column_config.NumberColumn("Pts", help="Puntos Totales"),
-            "DG": st.column_config.NumberColumn("DG", help="Diferencia de Goles"),
-            "Estado del Torneo": st.column_config.SelectColumn(
+            "Pts": st.column_config.NumberColumn("Pts", help="Puntos acumulados totales"),
+            "DG": st.column_config.NumberColumn("DG", help="Diferencia de goles (Goles a Favor - Goles en Contra)"),
+            "Estado del Torneo": st.column_config.TextColumn(
                 "Estado y Clasificación",
-                help="Situación de clasificación internacional o descenso",
-                width="medium"
+                help="Situación de acceso a copas o zona roja de descenso"
             ),
             "Rango Matemático": st.column_config.TextColumn(
                 "Rango Matemático Potencial",
-                help="Rango de posiciones al que puede ascender o descender matemáticamente"
+                help="Peor y mejor puesto posible considerando los puntos restantes del torneo"
             )
         },
         hide_index=True,
         use_container_width=True,
-        height=650
+        height=620
     )
 
 with tab2:
